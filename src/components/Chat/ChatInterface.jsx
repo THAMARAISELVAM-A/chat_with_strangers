@@ -2,8 +2,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CyberButton, ConnectionMeter } from '../UI/DesignSystem';
 import { 
-  Send, X, SkipForward, ShieldCheck, Zap, Gift, User, MoreVertical
+  Send, X, SkipForward, ShieldCheck, Zap, Gift, User, MoreVertical,
+  MapPin, Clock, Smile
 } from 'lucide-react';
+
+const MOOD_ICONS = {
+  FRIENDLY: { icon: '😊', label: 'Friendly' },
+  SKEPTICAL: { icon: '🤨', label: 'Skeptical' },
+  MYSTERIOUS: { icon: '👻', label: 'Mysterious' },
+  CHAOTIC: { icon: '🤪', label: 'Chaotic' }
+};
+
+const REACTION_EMOJIS = ['❤️', '😂', '😮', '😢', '👍'];
+
+const SHARED_INTERESTS = ['gaming', 'music', 'movies', 'tech', 'sports'];
 
 export default function ChatInterface({ 
   messages, 
@@ -21,6 +33,7 @@ export default function ChatInterface({
   const [showGiftAnim, setShowGiftAnim] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [lastMessageTime, setLastMessageTime] = useState(Date.now());
+  const [showReactions, setShowReactions] = useState(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -32,6 +45,16 @@ export default function ChatInterface({
     }
   }, [messages]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onSkip();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onSkip]);
+
   const handleGift = () => {
     setShowGiftAnim(true);
     onSendGift();
@@ -40,6 +63,8 @@ export default function ChatInterface({
 
   const timeSinceLastMessage = Math.floor((Date.now() - lastMessageTime) / 1000);
   const showDisconnectWarning = timeSinceLastMessage > 30 && messages.length > 0;
+
+  const currentMood = MOOD_ICONS[mood] || MOOD_ICONS.FRIENDLY;
 
   return (
     <motion.div 
@@ -69,18 +94,8 @@ export default function ChatInterface({
           className="absolute w-80 h-80 rounded-full bg-purple-500"
           style={{ filter: 'blur(70px)', bottom: '20%', right: '10%' }}
         />
-        <motion.div
-          animate={{ 
-            y: [0, -15, 0, 10, 0],
-            x: [0, 10, -5, 8, 0]
-          }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute w-40 h-40 rounded-full bg-pink-400"
-          style={{ filter: 'blur(40px)', top: '50%', right: '30%' }}
-        />
       </div>
 
-      {/* Mesh Shader Overlay */}
       <div className="mesh-shader opacity-20" />
 
       {/* Gift Animation Overlay */}
@@ -103,6 +118,38 @@ export default function ChatInterface({
         )}
       </AnimatePresence>
 
+      {/* Disconnect Warning Overlay */}
+      <AnimatePresence>
+        {showDisconnectWarning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
+            style={{ background: 'rgba(10, 10, 15, 0.7)', backdropFilter: 'blur(8px)' }}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              className="text-center p-6 rounded-2xl"
+              style={{
+                background: 'rgba(255, 45, 85, 0.1)',
+                border: '1px solid rgba(255, 45, 85, 0.2)'
+              }}
+            >
+              <div className="text-4xl mb-3">💭</div>
+              <div className="text-white font-medium mb-1">Stranger disconnected</div>
+              <div className="text-white/40 text-sm mb-4">
+                {timeSinceLastMessage}s ago
+              </div>
+              <CyberButton variant="secondary" onClick={onSkip} className="w-full">
+                Find New Match
+              </CyberButton>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main Chat Container */}
       <div className="flex-1 flex flex-col md:flex-row p-2 md:p-4 gap-2 md:gap-4 relative z-10">
         
@@ -116,7 +163,7 @@ export default function ChatInterface({
             border: '1px solid rgba(255, 255, 255, 0.05)'
           }}
         >
-           {/* Stream Header */}
+           {/* Knot.Chat-Style Header */}
            <div 
             className="px-4 py-3 flex items-center justify-between"
             style={{
@@ -144,21 +191,27 @@ export default function ChatInterface({
                    </div>
                    <div>
                       <div className="text-sm font-semibold text-white">Stranger</div>
-                      <div className="text-[11px] text-white/40 flex items-center gap-1.5">
+                      <div className="text-[11px] text-white/40 flex items-center gap-2">
                          {isTyping ? (
                            <span className="text-warning-amber">typing...</span>
                          ) : (
                            <>
-                             <span>Online</span>
-                             {showDisconnectWarning && (
-                               <span className="text-error-rose">· {timeSinceLastMessage}s ago</span>
-                             )}
+                             <span className="flex items-center gap-1">
+                               <MapPin size={10} />Earth
+                             </span>
+                             <span>·</span>
+                             <span className="flex items-center gap-1">
+                               <Smile size={10} />{currentMood.icon}
+                             </span>
                            </>
                          )}
                       </div>
                    </div>
                </div>
                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-white/30 mr-2 hidden md:block">
+                    ESC to skip
+                  </span>
                   <CyberButton onClick={onSkip} variant="secondary" className="py-2 h-9 text-[10px] px-3">
                      Skip
                   </CyberButton>
@@ -170,6 +223,29 @@ export default function ChatInterface({
                      <MoreVertical size={18} />
                   </button>
                </div>
+            </div>
+
+            {/* Common Interests Bar */}
+            <div 
+              className="px-4 py-2 flex items-center gap-2 flex-wrap"
+              style={{
+                borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
+              }}
+            >
+               <span className="text-[10px] text-white/30">Shared:</span>
+               {SHARED_INTERESTS.slice(0, 3).map(interest => (
+                 <span 
+                   key={interest}
+                   className="text-[10px] px-2 py-0.5 rounded-full"
+                   style={{
+                     background: 'rgba(0, 245, 255, 0.1)',
+                     color: '#00f5ff',
+                     border: '1px solid rgba(0, 245, 255, 0.2)'
+                   }}
+                 >
+                   {interest}
+                 </span>
+               ))}
             </div>
 
             {/* Messages List */}
@@ -216,6 +292,8 @@ export default function ChatInterface({
                      animate={{ opacity: 1, y: 0, scale: 1 }}
                      transition={{ duration: 0.2 }}
                      className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
+                     onmouseEnter={() => setShowReactions(msg.id)}
+                     onMouseLeave={() => setShowReactions(null)}
                    >
                      {!isUser && showAvatar && (
                        <div 
@@ -230,6 +308,24 @@ export default function ChatInterface({
                      {!isUser && !showAvatar && <div className="w-8 shrink-0" />}
                      
                      <div className={`max-w-[75%] flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+                        {/* Reaction buttons on hover */}
+                        {!isUser && showReactions === msg.id && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex gap-1 mb-1"
+                          >
+                            {REACTION_EMOJIS.map(emoji => (
+                              <button
+                                key={emoji}
+                                className="text-xs hover:scale-125 transition-transform"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                        
                         <div 
                           className={`px-4 py-2.5 rounded-2xl ${
                             isUser 
@@ -240,7 +336,8 @@ export default function ChatInterface({
                             isUser 
                               ? { 
                                   background: 'linear-gradient(135deg, #00f5ff, #00c4cc)',
-                                  boxShadow: '0 0 20px rgba(0, 245, 255, 0.2)'
+                                  boxShadow: '0 0 20px rgba(0, 245, 255, 0.2)',
+                                  fontWeight: 500
                                 }
                               : { 
                                   background: 'rgba(255, 255, 255, 0.05)',
@@ -254,8 +351,11 @@ export default function ChatInterface({
                              {msg.text}
                            </p>
                         </div>
-                        <div className="text-[10px] text-white/25 mt-1 px-1">
+                        <div className="text-[10px] text-white/25 mt-1 px-1 flex items-center gap-2">
                            {msg.time}
+                           {isUser && (
+                             <span className="text-neon-cyan">✓</span>
+                           )}
                         </div>
                      </div>
                    </motion.div>
@@ -286,9 +386,12 @@ export default function ChatInterface({
                        {[0, 1, 2].map(i => (
                          <motion.div 
                            key={i}
-                           animate={{ opacity: [0.3, 0.8, 0.3] }}
+                           animate={{ 
+                             opacity: [0.3, 0.8, 0.3],
+                             backgroundColor: ['rgba(255,255,255,0.3)', 'rgba(0,245,255,0.8)', 'rgba(255,255,255,0.3)']
+                           }}
                            transition={{ repeat: Infinity, duration: 1, delay: i * 0.15 }}
-                           className="w-2 h-2 bg-white/50 rounded-full" 
+                           className="w-2 h-2 rounded-full" 
                          />
                        ))}
                     </div>
@@ -366,7 +469,9 @@ export default function ChatInterface({
                     style={{ background: 'rgba(255, 255, 255, 0.03)' }}
                    >
                       <span className="text-xs text-white/50">Mood</span>
-                      <span className="text-xs text-white capitalize">{mood}</span>
+                      <span className="text-xs text-white flex items-center gap-1">
+                        {currentMood.icon} {currentMood.label}
+                      </span>
                    </div>
                 </div>
 

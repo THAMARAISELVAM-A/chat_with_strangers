@@ -1,17 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HUDCard, CyberButton } from '../UI/DesignSystem';
-import { Activity, Terminal, User, Hash, Zap, RefreshCw, X } from 'lucide-react';
+import { Activity, Terminal, User, Hash, Zap, RefreshCw, Target, Shield } from 'lucide-react';
+
+const STEPS = [
+  { id: 'scan', label: 'Scanning', icon: Target },
+  { id: 'find', label: 'Finding', icon: Search },
+  { id: 'connect', label: 'Connecting', icon: Zap },
+  { id: 'secure', label: 'Securing', icon: Shield }
+];
+
+function SearchIcon(props) {
+  return (
+    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" />
+    </svg>
+  );
+}
 
 export default function SearchingRadar({ profile, onFindMatch }) {
-  const [phase, setPhase] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState([]);
   const [dots, setDots] = useState('');
-  
-  const phases = [
-    { title: 'Scanning network', subtitle: 'Looking for available strangers' },
-    { title: 'Found someone!', subtitle: 'Connecting to peer...' },
-    { title: 'Almost there', subtitle: 'Establishing secure link' }
-  ];
 
   useEffect(() => {
     const dotInterval = setInterval(() => {
@@ -21,11 +32,20 @@ export default function SearchingRadar({ profile, onFindMatch }) {
   }, []);
 
   useEffect(() => {
-    const phaseTimer = setInterval(() => {
-      setPhase(p => (p + 1) % 3);
-    }, 2000);
-    return () => clearInterval(phaseTimer);
+    const stepTimer = setInterval(() => {
+      setCurrentStep(prev => {
+        if (prev < STEPS.length - 1) {
+          setCompletedSteps(c => [...c, prev]);
+          return prev + 1;
+        }
+        return prev;
+      });
+    }, 1200);
+    return () => clearInterval(stepTimer);
   }, []);
+
+  const currentStepData = STEPS[currentStep];
+  const CurrentIcon = currentStepData?.icon || Target;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-6 relative overflow-hidden" style={{ background: '#0a0a0f' }}>
@@ -62,35 +82,43 @@ export default function SearchingRadar({ profile, onFindMatch }) {
 
       <div className="mesh-shader opacity-40" />
 
-      {/* Animated Radar Rings */}
+      {/* Radar Animation Container */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        {[0, 1, 2].map(i => (
+        {/* Radar sweep */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+          className="absolute w-48 h-48 md:w-64 md:h-64 rounded-full"
+          style={{
+            background: 'conic-gradient(from 0deg, transparent 0deg, rgba(0, 245, 255, 0.3) 60deg, transparent 120deg)',
+            boxShadow: '0 0 30px rgba(0, 245, 255, 0.2)'
+          }}
+        />
+        
+        {/* Concentric rings */}
+        {[0.3, 0.5, 0.7, 0.9].map((scale, i) => (
           <motion.div
             key={i}
-            initial={{ scale: 0.3, opacity: 0.6 }}
-            animate={{ scale: [0.3, 1.5, 1.8], opacity: [0.6, 0.3, 0] }}
-            transition={{ 
-              duration: 3, 
-              delay: i * 0.8, 
-              repeat: Infinity,
-              ease: 'easeOut'
-            }}
-            className="absolute w-40 h-40 md:w-64 md:h-64 rounded-full border"
+            initial={{ scale: 0.3, opacity: 0.4 }}
+            animate={{ scale: [scale, scale * 1.05, scale], opacity: [0.4, 0.2, 0.4] }}
+            transition={{ repeat: Infinity, duration: 2 + i * 0.5, delay: i * 0.3 }}
+            className="absolute w-40 h-40 md:w-56 md:h-56 rounded-full border"
             style={{
-              borderColor: 'rgba(0, 245, 255, 0.25)',
-              boxShadow: '0 0 30px rgba(0, 245, 255, 0.2)'
+              borderColor: 'rgba(0, 245, 255, 0.15)',
+              transform: `scale(${scale * 1.5})`
             }}
           />
         ))}
       </div>
 
+      {/* Center Radar Core */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="relative z-10 w-full max-w-sm"
       >
         <HUDCard className="py-10 md:py-12 text-center">
-          {/* Radar Animation */}
+          {/* Radar Core */}
           <div className="relative mb-8">
             <motion.div
               animate={{ 
@@ -104,31 +132,90 @@ export default function SearchingRadar({ profile, onFindMatch }) {
                 boxShadow: '0 0 30px rgba(0, 245, 255, 0.3)'
               }}
             >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                className="absolute w-28 md:w-36 h-px"
-                style={{
-                  background: 'linear-gradient(90deg, #00f5ff, transparent)',
-                  transformOrigin: 'left center'
-                }}
-              />
               <Terminal className="text-neon-cyan relative z-10" size={28} />
             </motion.div>
           </div>
 
-          {/* Status */}
+          {/* Status Text */}
           <div className="space-y-2 mb-8">
             <h2 className="text-xl md:text-2xl font-bold text-white">
-              {phases[phase].title}
+              {currentStepData?.label} Network
               <span className="text-neon-cyan" style={{ textShadow: '0 0 20px rgba(0, 245, 255, 0.5)' }}>{dots}</span>
             </h2>
-            <p className="text-white/40 text-sm">{phases[phase].subtitle}</p>
+            <p className="text-white/40 text-sm">Finding your perfect match</p>
+          </div>
+
+          {/* Sequential Step Indicators */}
+          <div className="flex items-center justify-center gap-2 mb-8">
+            {STEPS.map((step, index) => {
+              const isCompleted = completedSteps.includes(index);
+              const isCurrent = index === currentStep;
+              const StepIcon = step.icon;
+              
+              return (
+                <React.Fragment key={step.id}>
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0.5 }}
+                    animate={{ 
+                      scale: isCurrent ? 1 : 0.9,
+                      opacity: isCompleted || isCurrent ? 1 : 0.4
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl"
+                    style={{
+                      background: isCompleted 
+                        ? 'rgba(0, 255, 100, 0.1)' 
+                        : isCurrent 
+                          ? 'rgba(0, 245, 255, 0.1)'
+                          : 'rgba(255, 255, 255, 0.03)',
+                      border: `1px solid ${
+                        isCompleted 
+                          ? 'rgba(0, 255, 100, 0.3)' 
+                          : isCurrent 
+                            ? 'rgba(0, 245, 255, 0.3)'
+                            : 'rgba(255, 255, 255, 0.05)'
+                      }`
+                    }}
+                  >
+                    <StepIcon 
+                      size={14} 
+                      className={
+                        isCompleted 
+                          ? 'text-success-emerald' 
+                          : isCurrent 
+                            ? 'text-neon-cyan'
+                            : 'text-white/30'
+                      } 
+                    />
+                    <span className={`text-[10px] ${
+                      isCompleted 
+                        ? 'text-success-emerald' 
+                        : isCurrent 
+                          ? 'text-neon-cyan'
+                          : 'text-white/30'
+                    }`}>
+                      {step.label}
+                    </span>
+                  </motion.div>
+                  {index < STEPS.length - 1 && (
+                    <motion.div
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ repeat: Infinity, duration: 1 }}
+                      className="w-4 h-px"
+                      style={{
+                        background: isCompleted 
+                          ? 'rgba(0, 255, 100, 0.5)' 
+                          : 'rgba(255, 255, 255, 0.15)'
+                      }}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
 
           {/* Profile Info */}
           <div 
-            className="flex items-center justify-center gap-6 mb-8 p-4 rounded-2xl"
+            className="flex items-center justify-center gap-6 mb-6 p-4 rounded-2xl"
             style={{
               background: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid rgba(255, 255, 255, 0.05)'
@@ -146,7 +233,7 @@ export default function SearchingRadar({ profile, onFindMatch }) {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-3 mb-8">
+          <div className="grid grid-cols-2 gap-3 mb-6">
             <motion.div
               whileHover={{ scale: 1.02 }}
               className="p-3 rounded-xl"

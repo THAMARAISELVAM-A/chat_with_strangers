@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Zap, Shield, MessageCircle } from 'lucide-react';
+import { MessageCircle, Users } from 'lucide-react';
 
 const containerVariants = {
   initial: { opacity: 0 },
@@ -21,6 +21,15 @@ const floatOrb = {
 };
 
 export default function Hero({ onGetStarted }) {
+  const [onlineCount, setOnlineCount] = useState(12453);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setOnlineCount(prev => prev + Math.floor(Math.random() * 5) - 2);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -89,66 +98,40 @@ export default function Hero({ onGetStarted }) {
           Stranger<span className="text-neon-cyan" style={{ textShadow: '0 0 30px rgba(0, 245, 255, 0.5)' }}>X</span>
         </h1>
         <p className="text-white/50 text-lg max-w-md mx-auto">
-          Chat anonymously with strangers from around the world
+          Chat anonymously with strangers worldwide
         </p>
       </motion.div>
 
-      {/* Stats Grid */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4 max-w-md mb-10 relative z-10">
+      {/* Live Online Counter */}
+      <motion.div variants={itemVariants} className="relative z-10 mb-10">
         <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="p-4 rounded-2xl"
+          whileHover={{ scale: 1.02 }}
+          className="px-6 py-3 rounded-2xl flex items-center gap-3"
           style={{
             background: 'rgba(255, 255, 255, 0.03)',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255, 255, 255, 0.08)'
           }}
         >
-          <Users size={24} className="text-neon-cyan mb-2" />
-          <div className="text-xl font-bold text-white">12K+</div>
-          <div className="text-xs text-white/40">Online Now</div>
-        </motion.div>
-        
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="p-4 rounded-2xl"
-          style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
-          }}
-        >
-          <Zap size={24} className="text-warning-amber mb-2" />
-          <div className="text-xl font-bold text-white">Instant</div>
-          <div className="text-xs text-white/40">Matching</div>
-        </motion.div>
-        
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="p-4 rounded-2xl"
-          style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
-          }}
-        >
-          <Shield size={24} className="text-success-emerald mb-2" />
-          <div className="text-xl font-bold text-white">100%</div>
-          <div className="text-xs text-white/40">Anonymous</div>
-        </motion.div>
-        
-        <motion.div
-          whileHover={{ scale: 1.02, y: -2 }}
-          className="p-4 rounded-2xl"
-          style={{
-            background: 'rgba(255, 255, 255, 0.03)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
-          }}
-        >
-          <MessageCircle size={24} className="text-purple-400 mb-2" />
-          <div className="text-xl font-bold text-white">AI</div>
-          <div className="text-xs text-white/40">Powered</div>
+          <div className="relative">
+            <Users size={20} className="text-neon-cyan" />
+            <motion.div
+              animate={{ scale: [1, 1.3, 1], opacity: [1, 0.5, 1] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success-emerald"
+            />
+          </div>
+          <div className="text-left">
+            <motion.div 
+              key={onlineCount}
+              initial={{ y: -10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="text-xl font-bold text-white"
+            >
+              {onlineCount.toLocaleString()}
+            </motion.div>
+            <div className="text-xs text-white/40">people online now</div>
+          </div>
         </motion.div>
       </motion.div>
 
