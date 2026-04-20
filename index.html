@@ -1,0 +1,59 @@
+# ⚡ StrangerX — Chat with Strangers (Localhost Version)
+
+Full-stack anonymous chat app: React + Node.js/Express backend + Claude AI.
+
+## 🗂 Project Structure
+
+```
+stranger-chat-app/
+├── server.js          ← Express backend (proxies Anthropic API)
+├── package.json
+├── .env.example       ← Copy to .env and add your API key
+├── .gitignore
+├── public/index.html
+└── src/
+    ├── index.js
+    └── App.jsx        ← Full React frontend
+```
+
+## 🚀 Setup
+
+### 1. Install dependencies
+```bash
+npm install
+```
+
+### 2. Add your Anthropic API key
+```bash
+cp .env.example .env
+# Then edit .env and paste your key:
+# ANTHROPIC_API_KEY=sk-ant-xxxxxxxx
+```
+Get your key at: https://console.anthropic.com/
+
+### 3. Start the app (both servers)
+```bash
+npm run dev
+```
+
+- Backend → http://localhost:5000
+- Frontend → http://localhost:3000
+
+### Or run separately:
+```bash
+npm run server   # Terminal 1: backend
+npm start        # Terminal 2: frontend
+```
+
+## ✨ Features
+- Interest-based matching (20 topics)
+- AI stranger powered by Claude (feels human)
+- Typing indicators, session timer, skip/disconnect
+- Dark neon cyberpunk design
+- No login required — fully anonymous
+
+## 🛠 Tech Stack
+- React 18 (frontend)
+- Express + Node.js (backend)
+- Anthropic Claude claude-sonnet-4-5 (AI stranger)
+- concurrently + nodemon (dev tools)

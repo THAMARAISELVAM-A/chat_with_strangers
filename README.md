@@ -1,6 +1,6 @@
-# ⚡ StrangerX — Chat with Strangers App
+# StrangerX — Chat with Strangers App
 
-A modern anonymous chat app built with React + Tailwind CSS.
+A modern anonymous chat app built with React.
 
 ## 🚀 Quick Start
 
@@ -13,7 +13,7 @@ Then open [http://localhost:3000](http://localhost:3000)
 
 ## ✨ Features
 
-- 🎯 Interest-based matching (20 interests)
+- 🎯 Interest-based matching
 - 🤖 AI-powered stranger responses
 - 💬 Real-time chat UI with typing indicators
 - ⏭ Skip to next stranger
@@ -31,7 +31,6 @@ npm run build
 - React 18
 - Framer Motion
 - Lucide React Icons
-- Custom CSS
 
 ## 📄 License
 
