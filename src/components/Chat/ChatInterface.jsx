@@ -139,7 +139,7 @@ export default function ChatInterface({
             >
               <div className="text-4xl mb-3">💭</div>
               <div className="text-white font-medium mb-1">Stranger disconnected</div>
-              <div className="text-white/40 text-sm mb-4">
+              <div className="text-white/50 text-sm mb-4">
                 {timeSinceLastMessage}s ago
               </div>
               <CyberButton variant="secondary" onClick={onSkip} className="w-full">
@@ -191,7 +191,7 @@ export default function ChatInterface({
                    </div>
                    <div>
                       <div className="text-sm font-semibold text-white">Stranger</div>
-                      <div className="text-[11px] text-white/40 flex items-center gap-2">
+                      <div className="text-[11px] text-white/50 flex items-center gap-2">
                          {isTyping ? (
                            <span className="text-warning-amber">typing...</span>
                          ) : (
@@ -209,7 +209,7 @@ export default function ChatInterface({
                    </div>
                </div>
                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-white/30 mr-2 hidden md:block">
+                  <span className="text-[10px] text-white/50 mr-2 hidden md:block">
                     ESC to skip
                   </span>
                   <CyberButton onClick={onSkip} variant="secondary" className="py-2 h-9 text-[10px] px-3">
@@ -232,7 +232,7 @@ export default function ChatInterface({
                 borderBottom: '1px solid rgba(255, 255, 255, 0.03)'
               }}
             >
-               <span className="text-[10px] text-white/30">Shared:</span>
+               <span className="text-[10px] text-white/50">Shared:</span>
                {SHARED_INTERESTS.slice(0, 3).map(interest => (
                  <span 
                    key={interest}
@@ -264,7 +264,7 @@ export default function ChatInterface({
                     >
                        <User size={28} className="text-white/20" />
                     </div>
-                    <p className="text-white/30 text-sm">Say hello to start the conversation!</p>
+                    <p className="text-white/50 text-sm">Say hello to start the conversation!</p>
                  </div>
                )}
 
@@ -277,7 +277,7 @@ export default function ChatInterface({
                  if (isSystem) return (
                    <div key={msg.id} className="flex justify-center py-2">
                      <span 
-                      className="text-[10px] font-medium text-white/40 px-3 py-1.5 rounded-full"
+                      className="text-[10px] font-medium text-white/50 px-3 py-1.5 rounded-full"
                       style={{ background: 'rgba(255, 255, 255, 0.03)' }}
                      >
                        {msg.text}
@@ -351,7 +351,7 @@ export default function ChatInterface({
                              {msg.text}
                            </p>
                         </div>
-                        <div className="text-[10px] text-white/25 mt-1 px-1 flex items-center gap-2">
+                        <div className="text-[10px] text-white/40 mt-1 px-1 flex items-center gap-2">
                            {msg.time}
                            {isUser && (
                              <span className="text-neon-cyan">✓</span>
@@ -441,17 +441,15 @@ export default function ChatInterface({
                   border: '1px solid rgba(255, 255, 255, 0.05)'
                 }}
               >
-                <div className="flex items-center justify-between">
-                   <div className="text-xs text-white/40 uppercase tracking-wider">Chat Info</div>
+<div className="flex items-center justify-between">
+                   <div className="text-xs text-white/50 uppercase tracking-wider">Chat Info</div>
                    <button 
-                    onClick={() => setSidebarOpen(false)} 
-                    className="text-white/30 hover:text-white transition-colors"
+                     onClick={() => setSidebarOpen(false)} 
+                     className="text-white/50 hover:text-white transition-colors"
                    >
-                      <X size={16} />
+                       <X size={16} />
                    </button>
                 </div>
-
-                <ConnectionMeter strength={strength} />
 
                 <div className="space-y-3">
                    <div 

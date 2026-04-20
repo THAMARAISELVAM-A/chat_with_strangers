@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 
-const MOOODS = {
+const MOODS = {
   FRIENDLY: {
     speed: 0.8, // Faster
     typoChance: 0.1,
@@ -32,13 +32,13 @@ const MOOODS = {
 };
 
 const TYPOS = {
-  'there': 'their',
-  'your': 'youre',
-  'cool': 'tool',
-  'hello': 'hrllo',
-  'matching': 'mathing',
-  'gaming': 'gamin',
-  'believe': 'beleive'
+  'the': 'teh',
+  'to': 'ot',
+  'you': 'u',
+  'are': 'r',
+  'that': 'taht',
+  'what': 'waht',
+  'with': 'wih'
 };
 
 export default function useStranger() {
@@ -51,7 +51,7 @@ export default function useStranger() {
   const moodRef = useRef('FRIENDLY');
 
   const initialize = useCallback((interests = []) => {
-    const keys = Object.keys(MOOODS);
+    const keys = Object.keys(MOODS);
     const randomMood = keys[Math.floor(Math.random() * keys.length)];
     setMood(randomMood);
     moodRef.current = randomMood;
@@ -63,7 +63,7 @@ export default function useStranger() {
   }, []);
 
   const generateResponse = useCallback(async (userText) => {
-    const currentMood = MOOODS[moodRef.current];
+    const currentMood = MOODS[moodRef.current];
     setIsTyping(true);
 
     // Contextual interest logic

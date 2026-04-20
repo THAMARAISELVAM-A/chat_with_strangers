@@ -73,17 +73,17 @@ export const GlowButton = ({ children, onClick, variant = 'primary', className =
       border: 'none'
     },
     secondary: {
-      background: 'rgba(255, 255, 255, 0.05)',
+      background: 'rgba(255, 255, 255, 0.08)',
       color: '#ffffff',
       border: '1px solid rgba(255, 255, 255, 0.15)'
     },
     danger: {
-      background: 'rgba(255, 45, 85, 0.1)',
+      background: 'rgba(255, 45, 85, 0.15)',
       color: '#ff2d55',
       border: '1px solid rgba(255, 45, 85, 0.3)'
     },
     warning: {
-      background: 'rgba(255, 170, 0, 0.1)',
+      background: 'rgba(255, 170, 0, 0.15)',
       color: '#ffaa00',
       border: '1px solid rgba(255, 170, 0, 0.3)'
     }
@@ -93,14 +93,14 @@ export const GlowButton = ({ children, onClick, variant = 'primary', className =
 
   return (
     <motion.button
-      whileHover={!disabled && !loading ? { scale: 1.02, y: -2 } : {}}
+      whileHover={!disabled && !loading ? { scale: 1.01 } : {}}
       whileTap={!disabled && !loading ? { scale: 0.98 } : {}}
       onClick={onClick}
       disabled={disabled || loading}
-      className={`px-6 py-3 rounded-full font-semibold text-sm transition-all duration-300 disabled:opacity-40 flex items-center justify-center gap-2 ${className}`}
+      className={`px-8 py-4 rounded-full font-semibold text-base transition-all duration-200 disabled:opacity-40 flex items-center justify-center gap-2 ${className}`}
       style={{
         ...style,
-        boxShadow: glow && !disabled ? '0 0 30px rgba(0, 245, 255, 0.3)' : 'none',
+        boxShadow: glow && !disabled ? '0 0 20px rgba(0, 245, 255, 0.3)' : 'none',
         cursor: disabled || loading ? 'not-allowed' : 'pointer'
       }}
     >
@@ -108,9 +108,11 @@ export const GlowButton = ({ children, onClick, variant = 'primary', className =
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-          className="w-4 h-4 border-2 border-current border-t-transparent rounded-full"
+          className="w-5 h-5 border-2 border-current border-t-transparent rounded-full"
         />
-      ) : children}
+      ) : (
+        children
+      )}
     </motion.button>
   );
 };
@@ -120,22 +122,30 @@ export const CyberButton = ({ children, onClick, variant = 'primary', className 
     primary: {
       background: 'rgba(0, 245, 255, 0.1)',
       color: '#00f5ff',
-      border: '2px solid rgba(0, 245, 255, 0.3)'
+      border: '2px solid rgba(0, 245, 255, 0.3)',
+      hoverBg: 'rgba(0, 245, 255, 0.2)',
+      hoverBorder: 'rgba(0, 245, 255, 0.5)'
     },
     secondary: {
       background: 'rgba(255, 255, 255, 0.05)',
       color: 'rgba(255, 255, 255, 0.6)',
-      border: '2px solid rgba(255, 255, 255, 0.15)'
+      border: '2px solid rgba(255, 255, 255, 0.15)',
+      hoverBg: 'rgba(255, 255, 255, 0.1)',
+      hoverBorder: 'rgba(255, 255, 255, 0.3)'
     },
     danger: {
       background: 'rgba(255, 45, 85, 0.1)',
       color: '#ff2d55',
-      border: '2px solid rgba(255, 45, 85, 0.3)'
+      border: '2px solid rgba(255, 45, 85, 0.3)',
+      hoverBg: 'rgba(255, 45, 85, 0.2)',
+      hoverBorder: 'rgba(255, 45, 85, 0.5)'
     },
     warning: {
       background: 'rgba(255, 170, 0, 0.1)',
       color: '#ffaa00',
-      border: '2px solid rgba(255, 170, 0, 0.3)'
+      border: '2px solid rgba(255, 170, 0, 0.3)',
+      hoverBg: 'rgba(255, 170, 0, 0.2)',
+      hoverBorder: 'rgba(255, 170, 0, 0.5)'
     }
   };
 
@@ -143,11 +153,11 @@ export const CyberButton = ({ children, onClick, variant = 'primary', className 
 
   return (
     <motion.button
-      whileHover={!disabled && !loading ? { scale: 1.02 } : {}}
+      whileHover={!disabled && !loading ? { scale: 1.01 } : {}}
       whileTap={!disabled && !loading ? { scale: 0.98 } : {}}
       onClick={onClick}
       disabled={disabled || loading}
-      className={`px-4 py-2.5 rounded-full font-medium text-xs transition-all duration-200 disabled:opacity-40 flex items-center justify-center gap-2 ${className}`}
+      className={`px-4 py-2.5 rounded-full font-medium text-xs transition-all duration-150 disabled:opacity-40 flex items-center justify-center gap-2 ${className}`}
       style={{
         ...style,
         cursor: disabled || loading ? 'not-allowed' : 'pointer'

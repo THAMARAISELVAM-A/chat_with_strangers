@@ -30,7 +30,7 @@ export default function IdentityStep({ step, setStep, profile, setProfile, onSta
             <HUDCard className="text-center space-y-8">
               <div className="space-y-2">
                 <h1 className="text-2xl md:text-3xl font-bold text-white">Who are you?</h1>
-                <p className="text-white/40 text-sm">Select your gender to find better matches</p>
+                <p className="text-white/50 text-sm">Select your gender to find better matches</p>
               </div>
 
               <div className="space-y-3">
@@ -66,7 +66,7 @@ export default function IdentityStep({ step, setStep, profile, setProfile, onSta
             <HUDCard className="text-center space-y-8">
               <div className="space-y-2">
                 <h1 className="text-2xl md:text-3xl font-bold text-white">How old are you?</h1>
-                <p className="text-white/40 text-sm">This helps us find relevant peers</p>
+                <p className="text-white/50 text-sm">This helps us find relevant peers</p>
               </div>
 
               <div className="grid grid-cols-1 gap-3">
@@ -94,7 +94,7 @@ export default function IdentityStep({ step, setStep, profile, setProfile, onSta
                 ))}
               </div>
 
-              <button onClick={() => setStep('gender')} className="flex items-center justify-center gap-2 text-white/40 hover:text-white/60 transition-colors text-sm">
+              <button onClick={() => setStep('gender')} className="flex items-center justify-center gap-2 text-white/50 hover:text-white/70 transition-colors text-sm">
                 <ArrowLeft size={16} /> Back
               </button>
             </HUDCard>
@@ -124,7 +124,7 @@ export default function IdentityStep({ step, setStep, profile, setProfile, onSta
                  <CyberButton onClick={onStart} className="w-full h-14 md:h-16 text-base">
                     Find a Stranger
                  </CyberButton>
-                 <button onClick={() => setStep('age')} className="text-white/30 hover:text-white/50 transition-colors text-sm">
+                 <button onClick={() => setStep('age')} className="text-white/50 hover:text-white/70 transition-colors text-sm">
                    Change details
                  </button>
                </div>

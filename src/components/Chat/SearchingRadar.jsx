@@ -5,7 +5,7 @@ import { Activity, Terminal, User, Hash, Zap, RefreshCw, Target, Shield } from '
 
 const STEPS = [
   { id: 'scan', label: 'Scanning', icon: Target },
-  { id: 'find', label: 'Finding', icon: Search },
+  { id: 'find', label: 'Finding', icon: SearchIcon },
   { id: 'connect', label: 'Connecting', icon: Zap },
   { id: 'secure', label: 'Securing', icon: Shield }
 ];
@@ -20,9 +20,8 @@ function SearchIcon(props) {
 }
 
 export default function SearchingRadar({ profile, onFindMatch }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState([]);
   const [dots, setDots] = useState('');
+  const [connectionTime, setConnectionTime] = useState(0);
 
   useEffect(() => {
     const dotInterval = setInterval(() => {
@@ -32,20 +31,13 @@ export default function SearchingRadar({ profile, onFindMatch }) {
   }, []);
 
   useEffect(() => {
-    const stepTimer = setInterval(() => {
-      setCurrentStep(prev => {
-        if (prev < STEPS.length - 1) {
-          setCompletedSteps(c => [...c, prev]);
-          return prev + 1;
-        }
-        return prev;
-      });
-    }, 1200);
-    return () => clearInterval(stepTimer);
+    const timer = setInterval(() => {
+      setConnectionTime(t => t + 0.1);
+    }, 100);
+    return () => clearInterval(timer);
   }, []);
 
-  const currentStepData = STEPS[currentStep];
-  const CurrentIcon = currentStepData?.icon || Target;
+  const currentStepData = STEPS[1]; // Show "Finding" always for simplified UI
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-6 relative overflow-hidden" style={{ background: '#0a0a0f' }}>
@@ -137,80 +129,13 @@ export default function SearchingRadar({ profile, onFindMatch }) {
           </div>
 
           {/* Status Text */}
-          <div className="space-y-2 mb-8">
+          <div className="space-y-2 mb-6">
             <h2 className="text-xl md:text-2xl font-bold text-white">
-              {currentStepData?.label} Network
-              <span className="text-neon-cyan" style={{ textShadow: '0 0 20px rgba(0, 245, 255, 0.5)' }}>{dots}</span>
+              Finding someone{dots}
             </h2>
-            <p className="text-white/40 text-sm">Finding your perfect match</p>
-          </div>
-
-          {/* Sequential Step Indicators */}
-          <div className="flex items-center justify-center gap-2 mb-8">
-            {STEPS.map((step, index) => {
-              const isCompleted = completedSteps.includes(index);
-              const isCurrent = index === currentStep;
-              const StepIcon = step.icon;
-              
-              return (
-                <React.Fragment key={step.id}>
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0.5 }}
-                    animate={{ 
-                      scale: isCurrent ? 1 : 0.9,
-                      opacity: isCompleted || isCurrent ? 1 : 0.4
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl"
-                    style={{
-                      background: isCompleted 
-                        ? 'rgba(0, 255, 100, 0.1)' 
-                        : isCurrent 
-                          ? 'rgba(0, 245, 255, 0.1)'
-                          : 'rgba(255, 255, 255, 0.03)',
-                      border: `1px solid ${
-                        isCompleted 
-                          ? 'rgba(0, 255, 100, 0.3)' 
-                          : isCurrent 
-                            ? 'rgba(0, 245, 255, 0.3)'
-                            : 'rgba(255, 255, 255, 0.05)'
-                      }`
-                    }}
-                  >
-                    <StepIcon 
-                      size={14} 
-                      className={
-                        isCompleted 
-                          ? 'text-success-emerald' 
-                          : isCurrent 
-                            ? 'text-neon-cyan'
-                            : 'text-white/30'
-                      } 
-                    />
-                    <span className={`text-[10px] ${
-                      isCompleted 
-                        ? 'text-success-emerald' 
-                        : isCurrent 
-                          ? 'text-neon-cyan'
-                          : 'text-white/30'
-                    }`}>
-                      {step.label}
-                    </span>
-                  </motion.div>
-                  {index < STEPS.length - 1 && (
-                    <motion.div
-                      animate={{ opacity: [0.3, 0.6, 0.3] }}
-                      transition={{ repeat: Infinity, duration: 1 }}
-                      className="w-4 h-px"
-                      style={{
-                        background: isCompleted 
-                          ? 'rgba(0, 255, 100, 0.5)' 
-                          : 'rgba(255, 255, 255, 0.15)'
-                      }}
-                    />
-                  )}
-                </React.Fragment>
-              );
-            })}
+            <p className="text-white/50 text-sm">
+              {connectionTime.toFixed(1)}s
+            </p>
           </div>
 
           {/* Profile Info */}
@@ -222,13 +147,13 @@ export default function SearchingRadar({ profile, onFindMatch }) {
             }}
           >
             <div className="flex flex-col items-center">
-              <User size={16} className="text-white/30 mb-1" />
-              <span className="text-xs text-white/50 capitalize">{profile.gender}</span>
+              <User size={16} className="text-white/50 mb-1" />
+              <span className="text-xs text-white/60 capitalize">{profile.gender}</span>
             </div>
             <div className="w-px h-8 bg-white/10" />
             <div className="flex flex-col items-center">
-              <Hash size={16} className="text-white/30 mb-1" />
-              <span className="text-xs text-white/50">{profile.age}</span>
+              <Hash size={16} className="text-white/50 mb-1" />
+              <span className="text-xs text-white/60">{profile.age}</span>
             </div>
           </div>
 
@@ -244,7 +169,7 @@ export default function SearchingRadar({ profile, onFindMatch }) {
             >
               <div className="flex items-center gap-2 mb-1">
                 <Zap size={12} className="text-neon-cyan" />
-                <span className="text-[10px] text-white/40 uppercase">Online</span>
+                <span className="text-[10px] text-white/50 uppercase">Online</span>
               </div>
               <div className="text-sm font-semibold text-white">12,453</div>
             </motion.div>
@@ -258,7 +183,7 @@ export default function SearchingRadar({ profile, onFindMatch }) {
             >
               <div className="flex items-center gap-2 mb-1">
                 <Activity size={12} className="text-success-emerald" />
-                <span className="text-[10px] text-white/40 uppercase">Encrypted</span>
+                <span className="text-[10px] text-white/50 uppercase">Encrypted</span>
               </div>
               <div className="text-sm font-semibold text-success-emerald">256-bit</div>
             </motion.div>

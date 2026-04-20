@@ -41,17 +41,21 @@ export default function App() {
   };
 
   const handleStartMatching = () => {
-    if (!profile.gender || !profile.age) return;
+    // Auto-set defaults if not selected - match knot.chat's minimal setup
+    const gender = profile.gender || "other";
+    const age = profile.age || "18-24";
+    const interests = profile.interests.length > 0 ? profile.interests : [];
+    setProfile(prev => ({ ...prev, gender, age }));
     setScreen("searching");
     
     setTimeout(() => {
-      strangerAI.initialize([profile.gender, profile.age]);
+      strangerAI.initialize(interests);
       setScreen("chat");
       
       setTimeout(() => {
         strangerAI.generateResponse("Hey there! 👋");
       }, 1500);
-    }, 4000);
+    }, 2300); // Match knot.chat's 2.3s connection time
   };
 
   const handleSend = () => {
@@ -143,7 +147,7 @@ export default function App() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-2 mb-6 transition-colors"
-                style={{ color: 'rgba(255, 255, 255, 0.4)' }}
+                style={{ color: 'rgba(255, 255, 255, 0.5)' }}
               >
                 <ArrowLeft size={18} /> Back
               </motion.button>
@@ -151,7 +155,7 @@ export default function App() {
               <HUDCard className="text-center space-y-6">
                 <div className="space-y-2">
                   <h1 className="text-2xl md:text-3xl font-bold text-white">Select Your Interests</h1>
-                  <p className="text-white/40 text-sm">Choose up to 5 interests to find better matches</p>
+                  <p className="text-white/50 text-sm">Choose up to 5 interests to find better matches</p>
                 </div>
 
                 <InterestsGrid 
@@ -254,7 +258,7 @@ export default function App() {
                   
                   <div className="space-y-2 mb-8">
                     <h2 className="text-xl font-bold text-white">Chat Ended</h2>
-                    <p className="text-white/40 text-sm">The stranger has disconnected</p>
+                    <p className="text-white/50 text-sm">The stranger has disconnected</p>
                   </div>
 
                   <div className="flex gap-3">

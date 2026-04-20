@@ -130,7 +130,7 @@ export default function Hero({ onGetStarted }) {
             >
               {onlineCount.toLocaleString()}
             </motion.div>
-            <div className="text-xs text-white/40">people online now</div>
+            <div className="text-xs text-white/50">people online now</div>
           </div>
         </motion.div>
       </motion.div>
@@ -158,7 +158,7 @@ export default function Hero({ onGetStarted }) {
         />
       </motion.button>
 
-      <motion.p variants={itemVariants} className="text-white/30 text-xs mt-6 relative z-10">
+      <motion.p variants={itemVariants} className="text-white/50 text-xs mt-6 relative z-10">
         No login required · Completely free
       </motion.p>
     </motion.div>
