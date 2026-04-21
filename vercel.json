@@ -1,0 +1,8 @@
+{
+  "build": {
+    "env": {
+      "REACT_APP_SUPABASE_URL": "https://zyfskdgyqxijouxxqscp.supabase.co",
+      "REACT_APP_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5ZnNrZGd5cXhpam91eHhxc2NwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTI5NzgsImV4cCI6MjA5MTMyODk3OH0.DDMKAQ11abahL1oo171sNrX110XLz4OLmy0la_Rp7vU"
+    }
+  }
+}

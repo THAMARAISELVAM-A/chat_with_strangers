@@ -5,20 +5,10 @@ import Chat from './components/Chat/Chat';
 import useSession from './hooks/useSession';
 import useMatching from './hooks/useMatching';
 
-type Stage =
-  | { kind: 'landing' }
-  | { kind: 'matching'; nickname: string }
-  | {
-      kind: 'chat';
-      nickname: string;
-      roomId: string;
-      mySessionId: string;
-      partnerSession: string;
-      partnerNick: string;
-    };
+/** @ typedef {{ kind: 'landing' } | { kind: 'matching'; nickname: string } | { kind: 'chat'; nickname: string; roomId: string; mySessionId: string; partnerSession: string; partnerNick: string }} Stage */
 
 export default function Index() {
-  const [stage, setStage] = useState<Stage>({ kind: 'landing' });
+  const [stage, setStage] = useState({ kind: 'landing' });
   const { session, isLoaded, setNickname } = useSession();
   const {
     isSearching,
@@ -44,7 +34,7 @@ export default function Index() {
   }, []);
 
   const handleStart = useCallback(
-    (nickname: string) => {
+    (nickname) => {
       setNickname(nickname);
       setStage({ kind: 'matching', nickname });
     },

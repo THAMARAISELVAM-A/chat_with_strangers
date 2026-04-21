@@ -1,10 +1,10 @@
 -- Anonymous Chat App Schema
--- Run this in Supabase SQL Editor
+-- Run this in Supabase SQL Editor (idempotent - can run multiple times)
 
 -- Enable Realtime extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Sessions table (anonymous user sessions)
+-- Sessions table
 CREATE TABLE IF NOT EXISTS sessions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   nickname TEXT NOT NULL,
@@ -12,12 +12,12 @@ CREATE TABLE IF NOT EXISTS sessions (
   last_active TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Rooms table (chat rooms)
+-- Rooms table
 CREATE TABLE IF NOT EXISTS rooms (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_a UUID REFERENCES sessions(id) ON DELETE CASCADE,
   user_b UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  status TEXT NOT NULL DEFAULT 'waiting', -- 'waiting', 'active', 'ended'
+  status TEXT NOT NULL DEFAULT 'waiting',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   ended_at TIMESTAMP WITH TIME ZONE
 );
@@ -53,52 +53,55 @@ CREATE TABLE IF NOT EXISTS blocks (
   UNIQUE(blocker_session, blocked_session)
 );
 
--- Row Level Security (RLS)
+-- Enable RLS
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blocks ENABLE ROW LEVEL SECURITY;
 
--- Sessions: Anyone can read, only service role can insert/update
+-- Drop existing policies if they exist (for re-runs)
+DROP POLICY IF EXISTS "Anyone can read sessions" ON sessions;
+DROP POLICY IF EXISTS "Anyone can insert sessions" ON sessions;
+DROP POLICY IF EXISTS "Anyone can update sessions" ON sessions;
+DROP POLICY IF EXISTS "Anyone can read rooms" ON rooms;
+DROP POLICY IF EXISTS "Anyone can insert rooms" ON rooms;
+DROP POLICY IF EXISTS "Anyone can update rooms" ON rooms;
+DROP POLICY IF EXISTS "Anyone can read messages" ON messages;
+DROP POLICY IF EXISTS "Anyone can insert messages" ON messages;
+DROP POLICY IF EXISTS "Anyone can insert reports" ON reports;
+DROP POLICY IF EXISTS "Anyone can read blocks" ON blocks;
+DROP POLICY IF EXISTS "Anyone can insert blocks" ON blocks;
+
+-- Create policies
 CREATE POLICY "Anyone can read sessions" ON sessions FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert sessions" ON sessions FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can update sessions" ON sessions FOR UPDATE USING (true);
-
--- Rooms: Users can read their own rooms, insert new rooms
 CREATE POLICY "Anyone can read rooms" ON rooms FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert rooms" ON rooms FOR INSERT WITH CHECK (true);
 CREATE POLICY "Anyone can update rooms" ON rooms FOR UPDATE USING (true);
-
--- Messages: Anyone can read messages for active rooms, insert messages
 CREATE POLICY "Anyone can read messages" ON messages FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert messages" ON messages FOR INSERT WITH CHECK (true);
-
--- Reports: Anyone can insert reports
 CREATE POLICY "Anyone can insert reports" ON reports FOR INSERT WITH CHECK (true);
-
--- Blocks: Anyone can read/insert blocks
 CREATE POLICY "Anyone can read blocks" ON blocks FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert blocks" ON blocks FOR INSERT WITH CHECK (true);
 
--- Enable Realtime for rooms and messages tables
+-- Enable Realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE rooms;
 ALTER PUBLICATION supabase_realtime ADD TABLE messages;
 
--- Storage bucket for chat images
+-- Storage bucket
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('chat-images', 'chat-images', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Storage policy: Anyone can read chat images
-CREATE POLICY "Anyone can view chat images" ON storage.objects
-FOR SELECT USING (bucket_id = 'chat-images');
+-- Storage policies
+DROP POLICY IF EXISTS "Anyone can view chat images" ON storage.objects;
+DROP POLICY IF EXISTS "Anyone can upload chat images" ON storage.objects;
+CREATE POLICY "Anyone can view chat images" ON storage.objects FOR SELECT USING (bucket_id = 'chat-images');
+CREATE POLICY "Anyone can upload chat images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'chat-images' AND auth.role() = 'authenticated');
 
--- Storage policy: Authenticated users can upload chat images
-CREATE POLICY "Anyone can upload chat images" ON storage.objects
-FOR INSERT WITH CHECK (bucket_id = 'chat-images' AND auth.role() = 'authenticated');
-
--- Indexes for performance
+-- Indexes
 CREATE INDEX IF NOT EXISTS idx_rooms_status ON rooms(status);
 CREATE INDEX IF NOT EXISTS idx_rooms_user_a ON rooms(user_a);
 CREATE INDEX IF NOT EXISTS idx_rooms_user_b ON rooms(user_b);
