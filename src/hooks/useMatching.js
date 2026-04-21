@@ -69,12 +69,7 @@ export default function useMatching(sessionId) {
     setError(null);
 
     try {
-      // Save session to database
-      await supabase.from('sessions').upsert({
-        id: sessionId,
-        nickname,
-        last_active: new Date().toISOString()
-      });
+      // Skip session save for now, just search for rooms
 
       // Try to find existing waiting room
       const { data: allRooms, error: roomsError } = await supabase
