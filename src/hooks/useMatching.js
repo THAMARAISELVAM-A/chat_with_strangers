@@ -77,12 +77,13 @@ export default function useMatching(sessionId) {
       });
 
       // Try to find existing waiting room
-      const { data: waitingRooms } = await supabase
+      const { data: allRooms } = await supabase
         .from('rooms')
         .select('*')
-        .eq('status', 'waiting')
-        .neq('user_a', sessionId)
-        .limit(1);
+        .eq('status', 'waiting');
+      
+      // Filter out own room client-side
+      const waitingRooms = allRooms?.filter(r => r.user_a !== sessionId) || [];
 
       let matchedRoom;
 
