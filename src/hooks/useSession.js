@@ -120,7 +120,7 @@ export default function useSession() {
 
   // Check if a user is blocked
   const isBlocked = useCallback(
-    (sessionId: string) => {
+    (sessionId) => {
       return session?.blockedUsers.includes(sessionId) ?? false;
     },
     [session]
