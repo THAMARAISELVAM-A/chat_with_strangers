@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import Landing from '@/components/Landing/Landing';
-import Matching from '@/components/Matching/Matching';
-import Chat from '@/components/Chat/Chat';
-import useSession from '@/hooks/useSession';
-import useMatching from '@/hooks/useMatching';
+import Landing from './components/Landing/Landing';
+import Matching from './components/Matching/Matching';
+import Chat from './components/Chat/Chat';
+import useSession from './hooks/useSession';
+import useMatching from './hooks/useMatching';
 
 type Stage =
   | { kind: 'landing' }
@@ -57,7 +57,7 @@ export default function Index() {
         kind: 'chat',
         nickname: stage.nickname,
         roomId,
-        mySessionId: session!.id,
+        mySessionId: session?.id,
         partnerSession: partnerSessionId,
         partnerNick: partnerNickname,
       });

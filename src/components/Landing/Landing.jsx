@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Shield, MessageCircle, ArrowRight } from 'lucide-react';
-import { validateNickname } from '@/hooks/useSession';
+import { validateNickname } from '../../hooks/useSession';
 
 interface LandingProps {
   onStart: (nickname: string) => void;

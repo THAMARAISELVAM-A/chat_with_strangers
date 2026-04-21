@@ -10,18 +10,9 @@ import {
   X,
   AlertTriangle,
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { ChatMessage, AppStage } from '@/types/chat';
+import { supabase } from '../../lib/supabase';
 
-interface ChatProps {
-  roomId: string;
-  mySessionId: string;
-  partnerSession: string;
-  partnerNick: string;
-  myNickname: string;
-  onSkip: () => void;
-  onLeave: () => void;
-}
+/** @typedef {{ roomId: string, mySessionId: string, partnerSession: string, partnerNick: string, myNickname: string, onSkip: () => void, onLeave: () => void }} ChatProps */
 
 /**
  * Chat screen - main conversation interface
@@ -35,7 +26,7 @@ export default function Chat({
   onSkip,
   onLeave,
 }: ChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [partnerTyping, setPartnerTyping] = useState(false);
@@ -44,10 +35,10 @@ export default function Chat({
   const [showMenu, setShowMenu] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   // Subscribe to new messages
   useEffect(() => {
@@ -62,7 +53,7 @@ export default function Chat({
           filter: `room_id=eq.${roomId}`,
         },
         (payload) => {
-          const msg = payload.new as ChatMessage;
+          const msg = payload.new;
           setMessages(prev => [...prev, msg]);
         }
       )

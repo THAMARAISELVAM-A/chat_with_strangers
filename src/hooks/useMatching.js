@@ -1,41 +1,41 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
-import { ChatRoom, ChatMessage } from '@/types/chat';
+import { supabase } from '../lib/supabase';
+// Types imported from ../types/chat
 
-interface UseMatchingReturn {
-  isSearching: boolean;
-  room: ChatRoom | null;
-  partnerSession: string | null;
-  partnerNick: string | null;
-  messages: ChatMessage[];
-  error: string | null;
-  startMatching: (nickname: string) => Promise<void>;
-  cancelMatching: () => void;
-  leaveRoom: () => Promise<void>;
-  sendMessage: (content: string, imageUrl?: string) => Promise<void>;
-  markTyping: (isTyping: boolean) => void;
-  isPartnerTyping: boolean;
-  reportPartner: (reason: string) => Promise<void>;
-}
+/** @typedef {{
+  isSearching: boolean,
+  room: object|null,
+  partnerSession: string|null,
+  partnerNick: string|null,
+  messages: Array,
+  error: string|null,
+  startMatching: function,
+  cancelMatching: function,
+  leaveRoom: function,
+  sendMessage: function,
+  markTyping: function,
+  isPartnerTyping: boolean,
+  reportPartner: function
+}} UseMatchingReturn */
 
 /**
  * Hook for managing the matching queue and chat room
  * Uses Supabase Realtime for instant pairing and messaging
  */
-export default function useMatching(sessionId: string): UseMatchingReturn {
+export default function useMatching(sessionId) {
   const [isSearching, setIsSearching] = useState(false);
-  const [room, setRoom] = useState<ChatRoom | null>(null);
-  const [partnerSession, setPartnerSession] = useState<string | null>(null);
-  const [partnerNick, setPartnerNick] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [room, setRoom] = useState(null);
+  const [partnerSession, setPartnerSession] = useState(null);
+  const [partnerNick, setPartnerNick] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [error, setError] = useState(null);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
 
-  const channelRef = useRef<any>(null);
-  const roomSubscriptionRef = useRef<any>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const typingChannelRef = useRef<any>(null);
-  const inactivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const channelRef = useRef(null);
+  const roomSubscriptionRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const typingChannelRef = useRef(null);
+  const inactivityTimeoutRef = useRef(null);
 
   const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
@@ -54,7 +54,7 @@ export default function useMatching(sessionId: string): UseMatchingReturn {
   /**
    * Enter the matching queue - wait for a partner
    */
-  const startMatching = useCallback(async (nickname: string) => {
+  const startMatching = useCallback(async (nickname) => {
     setIsSearching(true);
     setError(null);
 
@@ -68,7 +68,7 @@ export default function useMatching(sessionId: string): UseMatchingReturn {
 
       if (roomError) throw roomError;
 
-      let matchedRoom: ChatRoom;
+      let matchedRoom;
 
       if (existingRooms && existingRooms.length > 0) {
         // Found a waiting room - join it as user_b
@@ -103,7 +103,7 @@ export default function useMatching(sessionId: string): UseMatchingReturn {
         matchedRoom = newRoom;
 
         // Wait for a match via realtime subscription
-        await new Promise<void>((resolve, reject) => {
+        await new Promise((resolve, reject) => {
           const timeout = setTimeout(() => {
             reject(new Error('No match found within 60 seconds'));
           }, 60000);
@@ -145,7 +145,7 @@ export default function useMatching(sessionId: string): UseMatchingReturn {
       subscribeToRoom(matchedRoom.id);
 
       setIsSearching(false);
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message);
       setIsSearching(false);
     }
@@ -210,7 +210,7 @@ export default function useMatching(sessionId: string): UseMatchingReturn {
             filter: `room_id=eq.${roomId}`,
           },
           (payload) => {
-            const msg = payload.new as ChatMessage;
+            const msg = payload.new;
             // Add all messages (both from self and partner)
             setMessages(prev => [...prev, msg]);
             // Reset inactivity timer on received message

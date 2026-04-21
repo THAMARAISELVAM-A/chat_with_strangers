@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ChatSession } from '@/types/chat';
+// Types imported from ../types/chat
 
 const SESSION_KEY = 'whisper_session';
 const BLOCK_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
@@ -7,14 +7,14 @@ const BLOCK_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
 /**
  * Generate a unique session ID
  */
-function generateSessionId(): string {
+function generateSessionId() {
   return `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**
  * Validate nickname: 2-20 chars, no profanity/slurs (basic check)
  */
-export function validateNickname(nickname: string): { valid: boolean; error?: string } {
+export function validateNickname(nickname) {
   const trimmed = nickname.trim();
 
   if (trimmed.length < 2) {
@@ -53,7 +53,7 @@ export default function useSession() {
 
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as ChatSession;
+        const parsed = JSON.parse(stored);
         // Check if session is still valid (not stale)
         const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
         if (parsed.createdAt > thirtyDaysAgo) {
@@ -67,7 +67,7 @@ export default function useSession() {
     }
 
     // Create new session
-    const newSession: ChatSession = {
+    const newSession = {
       id: generateSessionId(),
       nickname: '',
       createdAt: Date.now(),
@@ -87,7 +87,7 @@ export default function useSession() {
   }, [session]);
 
   // Update nickname
-  const setNickname = useCallback((nickname: string) => {
+  const setNickname = useCallback((nickname) => {
     setSession(prev => prev ? { ...prev, nickname } : null);
   }, []);
 
@@ -97,7 +97,7 @@ export default function useSession() {
   }, []);
 
   // Block a user for 30 minutes
-  const blockUser = useCallback((sessionId: string) => {
+  const blockUser = useCallback((sessionId) => {
     setSession(prev => {
       if (!prev) return prev;
       return {
