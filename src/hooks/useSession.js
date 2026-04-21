@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
 
 const SESSION_KEY = 'stranger_chat_session';
 
@@ -40,9 +39,7 @@ export default function useSession() {
           setIsLoaded(true);
           return;
         }
-      } catch (e) {
-        console.error('Session parse error:', e);
-      }
+      } catch (e) {}
     }
 
     const newSession = {

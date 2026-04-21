@@ -9,7 +9,9 @@ import {
   Image,
   AlertTriangle,
   Shield,
-  X
+  X,
+  Check,
+  CheckCheck
 } from 'lucide-react';
 
 /**
@@ -38,7 +40,7 @@ export default function Chat({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isPartnerTyping]);
 
   const handleSend = () => {
     if (!inputText.trim()) return;
@@ -49,8 +51,6 @@ export default function Chat({
 
   const handleInputChange = (e) => {
     setInputText(e.target.value);
-    
-    // Send typing indicator
     onTyping?.(true);
     
     if (typingTimeoutRef.current) {
@@ -81,7 +81,6 @@ export default function Chat({
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const myInitial = myNickname?.charAt(0).toUpperCase() || 'Y';
   const partnerInitial = partnerNick?.charAt(0).toUpperCase() || 'S';
 
   return (
@@ -92,7 +91,9 @@ export default function Chat({
           <div className="chat-avatar">{partnerInitial}</div>
           <div className="chat-header-info">
             <h3>{partnerNick}</h3>
-            <span>Online</span>
+            <span className="online-indicator">
+              <span className="dot" /> Active
+            </span>
           </div>
         </div>
         
@@ -110,13 +111,13 @@ export default function Chat({
                 <SkipForward size={16} />
                 Skip to next
               </div>
-              <div className="menu-item" onClick={onLeave} style={{ color: 'var(--error)' }}>
+              <div className="menu-item danger" onClick={() => setShowReport(true)}>
+                <Shield size={16} />
+                Report User
+              </div>
+              <div className="menu-item danger" onClick={onLeave}>
                 <LogOut size={16} />
                 Leave chat
-              </div>
-              <div className="menu-item" onClick={() => setShowReport(true)} style={{ color: 'var(--error)' }}>
-                <Shield size={16} />
-                Report
               </div>
             </div>
           )}
@@ -126,12 +127,9 @@ export default function Chat({
       {/* Messages */}
       <div className="chat-messages custom-scrollbar">
         {messages.length === 0 && (
-          <div style={{ 
-            textAlign: 'center', 
-            color: 'var(--text-muted)',
-            padding: '40px 0'
-          }}>
-            <p>Say hi to {partnerNick}! 👋</p>
+          <div className="empty-chat">
+            <p>You are now connected with {partnerNick}! 👋</p>
+            <span>Messages are anonymous and secure.</span>
           </div>
         )}
         
@@ -140,21 +138,33 @@ export default function Chat({
           return (
             <div 
               key={msg.id || i} 
-              className={`message ${isMine ? 'message-sent' : 'message-received'}`}
+              className={`message-wrapper ${isMine ? 'mine' : 'theirs'}`}
             >
-              <p>{msg.content}</p>
-              {msg.created_at && (
-                <span className="message-time">{formatTime(msg.created_at)}</span>
-              )}
+              <div className={`message-bubble ${isMine ? 'message-sent' : 'message-received'}`}>
+                <p>{msg.content}</p>
+                <div className="message-meta">
+                  <span className="message-time">{formatTime(msg.created_at)}</span>
+                  {isMine && (
+                    <span className={`status-tick ${msg.status || 'sent'}`}>
+                      {msg.status === 'delivered' ? <CheckCheck size={14} /> : <Check size={14} />}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           );
         })}
         
         {isPartnerTyping && (
-          <div className="typing-indicator">
-            <span className="typing-dot" />
-            <span className="typing-dot" />
-            <span className="typing-dot" />
+          <div className="message-wrapper theirs">
+            <div className="typing-indicator-wrapper">
+              <div className="typing-indicator">
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+              </div>
+              <span className="typing-text">{partnerNick} is typing...</span>
+            </div>
           </div>
         )}
         
@@ -162,83 +172,69 @@ export default function Chat({
       </div>
 
       {/* Input */}
-      <div className="chat-input-container">
-        <button className="btn btn-ghost btn-icon">
-          <Paperclip size={20} />
-        </button>
-        
-        <input
-          type="text"
-          className="chat-input"
-          placeholder="Type a message..."
-          value={inputText}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-        />
-        
-        <button className="btn btn-ghost btn-icon">
-          <Smile size={20} />
-        </button>
-        
-        <button 
-          className="btn btn-primary btn-icon"
-          onClick={handleSend}
-          disabled={!inputText.trim()}
-        >
-          <Send size={18} />
-        </button>
+      <div className="chat-input-wrapper glass">
+        <div className="chat-input-container">
+          <button className="btn btn-ghost btn-icon" title="Attach">
+            <Paperclip size={20} />
+          </button>
+          
+          <input
+            type="text"
+            className="chat-input"
+            placeholder="Type your message here..."
+            value={inputText}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+          />
+          
+          <button className="btn btn-ghost btn-icon" title="Emoji">
+            <Smile size={20} />
+          </button>
+          
+          <button 
+            className="btn btn-primary btn-icon send-button"
+            onClick={handleSend}
+            disabled={!inputText.trim()}
+          >
+            <Send size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Report Modal */}
       {showReport && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }} onClick={() => setShowReport(false)}>
-          <div style={{
-            background: 'var(--bg-secondary)',
-            padding: 24,
-            borderRadius: 16,
-            maxWidth: 400,
-            width: '90%',
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div className="modal-overlay" onClick={() => setShowReport(false)}>
+          <div className="modal-content glass" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
               <h3>Report {partnerNick}</h3>
               <button className="btn btn-ghost btn-icon" onClick={() => setShowReport(false)}>
                 <X size={20} />
               </button>
             </div>
             
-            <p style={{ color: 'var(--text-secondary)', marginBottom: 16, fontSize: 14 }}>
-              Why are you reporting this user?
-            </p>
-            
-            <select
-              className="input"
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value)}
-              style={{ marginBottom: 16 }}
-            >
-              <option value="">Select a reason</option>
-              <option value="inappropriate">Inappropriate behavior</option>
-              <option value="harassment">Harassment</option>
-              <option value="spam">Spam</option>
-              <option value="other">Other</option>
-            </select>
-            
-            <button
-              className="btn btn-primary"
-              onClick={handleReport}
-              disabled={!reportReason}
-              style={{ width: '100%' }}
-            >
-              Submit Report
-            </button>
+            <div className="modal-body">
+              <p>Why are you reporting this user?</p>
+              <select
+                className="input"
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+              >
+                <option value="">Select a reason</option>
+                <option value="inappropriate">Inappropriate behavior</option>
+                <option value="harassment">Harassment</option>
+                <option value="spam">Spam</option>
+                <option value="other">Other</option>
+              </select>
+              
+              <button
+                className="btn btn-primary"
+                onClick={handleReport}
+                disabled={!reportReason}
+                style={{ width: '100%', marginTop: 20 }}
+              >
+                Submit Report
+              </button>
+            </div>
           </div>
         </div>
       )}

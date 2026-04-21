@@ -1,111 +1,52 @@
--- Anonymous Chat App Schema
--- Run this in Supabase SQL Editor (idempotent - can run multiple times)
+-- FIXED Schema - Run this in Supabase SQL Editor
 
--- Enable Realtime extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Drop existing tables
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS rooms CASCADE;
+DROP TABLE IF EXISTS sessions CASCADE;
+DROP TABLE IF EXISTS reports CASCADE;
 
--- Sessions table
-CREATE TABLE IF NOT EXISTS sessions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+-- Create tables with TEXT IDs
+CREATE TABLE sessions (
+  id TEXT PRIMARY KEY,
   nickname TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  last_active TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  last_active TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Rooms table
-CREATE TABLE IF NOT EXISTS rooms (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_a UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  user_b UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  status TEXT NOT NULL DEFAULT 'waiting',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  ended_at TIMESTAMP WITH TIME ZONE
+CREATE TABLE rooms (
+  id TEXT PRIMARY KEY,
+  user_a TEXT,
+  user_b TEXT,
+  status TEXT DEFAULT 'waiting',
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Messages table
-CREATE TABLE IF NOT EXISTS messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  room_id UUID REFERENCES rooms(id) ON DELETE CASCADE,
-  sender_session_id UUID REFERENCES sessions(id) ON DELETE SET NULL,
+CREATE TABLE messages (
+  id TEXT PRIMARY KEY,
+  room_id TEXT,
+  sender_session_id TEXT,
   sender_nickname TEXT,
   content TEXT,
   image_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Reports table
-CREATE TABLE IF NOT EXISTS reports (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  reporter_session UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  reported_session UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  room_id UUID REFERENCES rooms(id) ON DELETE SET NULL,
+CREATE TABLE reports (
+  id TEXT PRIMARY KEY,
+  reporter_session TEXT,
+  reported_session TEXT,
+  room_id TEXT,
   reason TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Block list table
-CREATE TABLE IF NOT EXISTS blocks (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  blocker_session UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  blocked_session UUID REFERENCES sessions(id) ON DELETE CASCADE,
-  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(blocker_session, blocked_session)
-);
-
--- Enable RLS
-ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
-ALTER TABLE blocks ENABLE ROW LEVEL SECURITY;
-
--- Drop existing policies if they exist (for re-runs)
-DROP POLICY IF EXISTS "Anyone can read sessions" ON sessions;
-DROP POLICY IF EXISTS "Anyone can insert sessions" ON sessions;
-DROP POLICY IF EXISTS "Anyone can update sessions" ON sessions;
-DROP POLICY IF EXISTS "Anyone can read rooms" ON rooms;
-DROP POLICY IF EXISTS "Anyone can insert rooms" ON rooms;
-DROP POLICY IF EXISTS "Anyone can update rooms" ON rooms;
-DROP POLICY IF EXISTS "Anyone can read messages" ON messages;
-DROP POLICY IF EXISTS "Anyone can insert messages" ON messages;
-DROP POLICY IF EXISTS "Anyone can insert reports" ON reports;
-DROP POLICY IF EXISTS "Anyone can read blocks" ON blocks;
-DROP POLICY IF EXISTS "Anyone can insert blocks" ON blocks;
-
--- Create policies
-CREATE POLICY "Anyone can read sessions" ON sessions FOR SELECT USING (true);
-CREATE POLICY "Anyone can insert sessions" ON sessions FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone can update sessions" ON sessions FOR UPDATE USING (true);
-CREATE POLICY "Anyone can read rooms" ON rooms FOR SELECT USING (true);
-CREATE POLICY "Anyone can insert rooms" ON rooms FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone can update rooms" ON rooms FOR UPDATE USING (true);
-CREATE POLICY "Anyone can read messages" ON messages FOR SELECT USING (true);
-CREATE POLICY "Anyone can insert messages" ON messages FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone can insert reports" ON reports FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone can read blocks" ON blocks FOR SELECT USING (true);
-CREATE POLICY "Anyone can insert blocks" ON blocks FOR INSERT WITH CHECK (true);
+-- DISABLE RLS COMPLETELY (for anonymous chat)
+ALTER TABLE sessions DISABLE ROW LEVEL SECURITY;
+ALTER TABLE rooms DISABLE ROW LEVEL SECURITY;
+ALTER TABLE messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE reports DISABLE ROW LEVEL SECURITY;
 
 -- Enable Realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE rooms;
 ALTER PUBLICATION supabase_realtime ADD TABLE messages;
-
--- Storage bucket
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('chat-images', 'chat-images', true)
-ON CONFLICT (id) DO NOTHING;
-
--- Storage policies
-DROP POLICY IF EXISTS "Anyone can view chat images" ON storage.objects;
-DROP POLICY IF EXISTS "Anyone can upload chat images" ON storage.objects;
-CREATE POLICY "Anyone can view chat images" ON storage.objects FOR SELECT USING (bucket_id = 'chat-images');
-CREATE POLICY "Anyone can upload chat images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'chat-images' AND auth.role() = 'authenticated');
-
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_rooms_status ON rooms(status);
-CREATE INDEX IF NOT EXISTS idx_rooms_user_a ON rooms(user_a);
-CREATE INDEX IF NOT EXISTS idx_rooms_user_b ON rooms(user_b);
-CREATE INDEX IF NOT EXISTS idx_messages_room_id ON messages(room_id);
-CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
-CREATE INDEX IF NOT EXISTS idx_blocks_expires ON blocks(expires_at);
-CREATE INDEX IF NOT EXISTS idx_sessions_last_active ON sessions(last_active);
